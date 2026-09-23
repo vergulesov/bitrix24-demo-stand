@@ -1,92 +1,115 @@
-# Bitrix24 Demo Stand / Scenario Simulator
+# Bitrix24 Demo Stand
 
-A reproducible demo environment for Bitrix24 CRM scenarios.
+**Reproducible demonstration environment for Bitrix24 CRM, Open Lines, AI qualification and SLA-driven recruitment workflows.**
 
-The project prepares a Bitrix24 portal for a presentation by generating synthetic candidates, creating CRM deals, filling the required fields, and running predefined scenarios instead of preparing demo data manually.
+This project packages the working components needed to prepare and run a repeatable Bitrix24 demonstration without rebuilding the demo data by hand.
 
-## What it solves
+The stand is built around a simple idea:
 
-A CRM demo is much easier to run when the starting state is reproducible.
+> **Prepare the CRM state → run a realistic scenario → demonstrate the business process.**
 
-Instead of manually creating candidates and deals before every presentation, the Demo Stand generates synthetic data and prepares Bitrix24 for a predefined scenario.
+## What the stand demonstrates
+
+The current scenario is based on a recruitment agency workflow:
+
+1. A candidate sends an incoming message.
+2. The message enters a Bitrix24 Open Line.
+3. The connector sends the message into Bitrix24.
+4. GigaChat analyzes the incoming text and determines the desired position.
+5. Bitrix24 creates or updates the CRM deal.
+6. SLA / priority / urgency data remains under the CRM workflow and is not overwritten by AI qualification.
+7. The recruiter works with the candidate through the recruitment pipeline.
+8. The resulting CRM state can be shown as part of a short presentation.
+
+The project is intentionally a **demo stand**, not a complete HR platform.
 
 ## Architecture
 
 ```
-Scenario Simulator
-       |
-       | REST / HTTP
-       v
-Bitrix24 Connector
-       |
-       | Bitrix24 REST API / Open Lines
-       v
-    Bitrix24
+                    Demo scenario
+                         │
+                         ▼
+                ┌─────────────────┐
+                │  Scenario       │
+                │  Simulator      │
+                └────────┬────────┘
+                         │
+                         │ HTTP / REST
+                         ▼
+                ┌─────────────────┐
+                │ Bitrix24        │
+                │ Connector       │
+                └────────┬────────┘
+                         │
+                         │ Bitrix24 REST API
+                         │ Open Lines
+                         ▼
+                ┌─────────────────┐
+                │    Bitrix24     │
+                │ CRM + Open Lines│
+                └─────────────────┘
+                         ▲
+                         │
+                    GigaChat
+                  AI qualification
 ```
 
-The project contains two cooperating components:
+### Components
 
-- **Scenario Simulator** — generates demo data and runs predefined CRM scenarios.
-- **Bitrix24 Connector** — integration component used by the simulator for the communication flow with Bitrix24 and Open Lines.
+#### `demo-stand/`
 
-## Scenario Simulator
+The presentation-side simulator and Bitrix24 setup scripts.
 
-The simulator can:
+It is responsible for:
 
-- generate synthetic candidate data;
-- create CRM deals;
-- populate candidate and process fields;
-- place deals into required pipeline stages;
-- generate different candidate states for a presentation;
-- prepare SLA-related data;
-- run repeatable demo scenarios;
-- clear previously generated demo data;
-- run health checks for the demo environment.
+- preparing the CRM environment;
+- creating synthetic candidates and deals;
+- populating demo fields;
+- placing records into the required pipeline stages;
+- generating repeatable candidate scenarios;
+- preparing SLA-related demo states;
+- running the scripted presentation flow;
+- restoring / cleaning demo data.
 
-Generated records use dedicated demo markers so they can be identified and cleaned up without affecting unrelated CRM data.
+The main scenario logic lives in `staffflow_simulator.py`.
 
-## Bitrix24 Connector
+#### `connector/`
 
-The connector is a separate component of the demo stand.
+The working Bitrix24 connector used by the demo.
 
-It provides the integration layer required by the presentation scenario, including interaction with Bitrix24 REST API and Open Lines.
+It provides:
 
-The connector is located in `connector/`.
+- Bitrix24 connector registration;
+- Open Line message delivery;
+- interaction with Bitrix24 REST API;
+- GigaChat-based position recognition;
+- CRM deal creation/update logic;
+- Open Line diagnostics;
+- an external `/send` endpoint for the simulator.
 
-## Example flow
-
-```
-Run scenario
-     ↓
-Generate synthetic candidate
-     ↓
-Create / update CRM deal
-     ↓
-Populate scenario fields
-     ↓
-Prepare Open Line / CRM state
-     ↓
-Bitrix24 is ready for demonstration
-```
+The connector is deliberately kept separate from the simulator so the integration layer can be demonstrated independently.
 
 ## Project structure
 
 ```
 bitrix24-demo-stand/
+├── connector/
+│   ├── app.py
+│   ├── requirements.txt
+│   ├── .env.example
+│   └── README.md
+│
 ├── demo-stand/
-│   ├── main.py
-│   ├── demo.py
 │   ├── staffflow_simulator.py
 │   ├── ai_position_demo.py
 │   ├── sla_demo.py
+│   ├── main.py
+│   ├── demo.py
+│   ├── setup.py
+│   ├── restore.py
 │   ├── bitrix.py
 │   ├── config.py
 │   ├── schema.py
-│   ├── setup.py
-│   └── restore.py
-│
-├── connector/
-│   ├── app.py
 │   ├── requirements.txt
 │   └── .env.example
 │
@@ -94,20 +117,106 @@ bitrix24-demo-stand/
 └── .gitignore
 ```
 
-## Requirements
+## Getting started
 
-- Python 3.10+
-- Bitrix24 portal with REST access
-- Bitrix24 webhook for the simulator
-- GigaChat credentials for the AI demonstration
-- VPS or another reachable host for the connector
+### 1. Prepare Bitrix24
 
-## Configuration
+The demo requires a Bitrix24 portal with:
 
-Create local `.env` files using the provided examples.
+- REST access;
+- the recruitment pipeline used by the scenario;
+- the required CRM fields;
+- an Open Line configured for the connector.
 
-Real credentials, tokens, logs and local environment files are intentionally excluded from the repository.
+The setup scripts in `demo-stand/` are intended to prepare the CRM-side demo environment.
+
+### 2. Configure the simulator
+
+Copy:
+
+```text
+demo-stand/.env.example → demo-stand/.env
+```
+
+Set the Bitrix24 webhook and the connector endpoint/token required by the local environment.
+
+### 3. Configure the connector
+
+Copy:
+
+```text
+connector/.env.example → connector/.env
+```
+
+Set the GigaChat authorization key.
+
+The connector also needs to be deployed to a publicly reachable host because Bitrix24 must be able to call its handler.
+
+### 4. Install dependencies
+
+For the simulator:
+
+```bash
+cd demo-stand
+pip install -r requirements.txt
+```
+
+For the connector:
+
+```bash
+cd connector
+pip install -r requirements.txt
+```
+
+### 5. Run the scenario
+
+The exact entry point depends on the scenario being demonstrated. The main simulator and individual demo scripts are kept in `demo-stand/`.
+
+## Presentation scenario
+
+The stand was built around a short 5–7 minute demonstration:
+
+```
+Problem
+   ↓
+Incoming candidate
+   ↓
+AI qualification
+   ↓
+SLA
+   ↓
+Recruiter workspace
+   ↓
+Result
+   ↓
+Report
+   ↓
+V2
+```
+
+The goal is to show the value of the automation rather than present every possible CRM configuration.
+
+## Safety of demo data
+
+The simulator works with synthetic candidates and dedicated demo markers.
+
+Before using it against a real portal:
+
+- verify the configured webhook;
+- verify the pipeline and field IDs;
+- check the target Open Line;
+- never commit credentials or tokens;
+- use a dedicated demo environment where possible.
+
+## Related project
+
+The original setup project remains separate and is not replaced by this repository.
+
+- `bitrix24-quick-setup` — original Bitrix24 setup / automation project.
+- `bitrix24-demo-stand` — standalone portfolio-ready demo environment.
 
 ## Status
 
-Working demonstration project used to prepare and run Bitrix24 CRM presentation scenarios.
+**Working demo project.**
+
+The repository contains the current connector and the demo-stand files used for the Bitrix24 recruitment automation presentation.
