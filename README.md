@@ -1,37 +1,37 @@
 # Bitrix24 Demo Stand
 
-**Reproducible demonstration environment for Bitrix24 CRM, Open Lines, AI qualification and SLA-driven recruitment workflows.**
+**Воспроизводимая демонстрационная среда для Bitrix24 CRM, Открытых линий, AI-квалификации и рекрутинговых процессов с использованием SLA.**
 
-This project packages the working components needed to prepare and run a repeatable Bitrix24 demonstration without rebuilding the demo data by hand.
+Этот проект объединяет рабочие компоненты, необходимые для подготовки и запуска повторяемой демонстрации Bitrix24 без необходимости вручную пересоздавать демо-данные.
 
-The stand is built around a simple idea:
+В основе стенда простая идея:
 
-> **Prepare the CRM state → run a realistic scenario → demonstrate the business process.**
+> **Подготовить состояние CRM → запустить реалистичный сценарий → продемонстрировать бизнес-процесс.**
 
-## What the stand demonstrates
+## Что демонстрирует стенд
 
-The current scenario is based on a recruitment agency workflow:
+Текущий сценарий основан на процессе работы кадрового агентства:
 
-1. A candidate sends an incoming message.
-2. The message enters a Bitrix24 Open Line.
-3. The connector sends the message into Bitrix24.
-4. GigaChat analyzes the incoming text and determines the desired position.
-5. Bitrix24 creates or updates the CRM deal.
-6. SLA / priority / urgency data remains under the CRM workflow and is not overwritten by AI qualification.
-7. The recruiter works with the candidate through the recruitment pipeline.
-8. The resulting CRM state can be shown as part of a short presentation.
+1. Кандидат отправляет входящее сообщение.
+2. Сообщение попадает в Открытую линию Bitrix24.
+3. Коннектор передаёт сообщение в Bitrix24.
+4. GigaChat анализирует входящий текст и определяет желаемую должность.
+5. Bitrix24 создаёт или обновляет сделку в CRM.
+6. Данные SLA / приоритета / срочности остаются под управлением CRM-процесса и не перезаписываются AI-квалификацией.
+7. Рекрутер работает с кандидатом через воронку подбора.
+8. Итоговое состояние CRM можно показать в рамках короткой презентации.
 
-The project is intentionally a **demo stand**, not a complete HR platform.
+Проект намеренно является **демонстрационным стендом, а не полноценной HR-платформой**.
 
-## Architecture
+## Архитектура
 
 ```
-                    Demo scenario
+                    Демо-сценарий
                          │
                          ▼
                 ┌─────────────────┐
-                │  Scenario       │
-                │  Simulator      │
+                │  Симулятор      │
+                │  сценария       │
                 └────────┬────────┘
                          │
                          │ HTTP / REST
@@ -42,54 +42,55 @@ The project is intentionally a **demo stand**, not a complete HR platform.
                 └────────┬────────┘
                          │
                          │ Bitrix24 REST API
-                         │ Open Lines
+                         │ Открытые линии
                          ▼
                 ┌─────────────────┐
                 │    Bitrix24     │
-                │ CRM + Open Lines│
+                │ CRM + Открытые  │
+                │ линии           │
                 └─────────────────┘
                          ▲
                          │
                     GigaChat
-                  AI qualification
+                 AI-квалификация
 ```
 
-### Components
+### Компоненты
 
 #### `demo-stand/`
 
-The presentation-side simulator and Bitrix24 setup scripts.
+Симулятор со стороны презентации и скрипты настройки Bitrix24.
 
-It is responsible for:
+Он отвечает за:
 
-- preparing the CRM environment;
-- creating synthetic candidates and deals;
-- populating demo fields;
-- placing records into the required pipeline stages;
-- generating repeatable candidate scenarios;
-- preparing SLA-related demo states;
-- running the scripted presentation flow;
-- restoring / cleaning demo data.
+- подготовку CRM-окружения;
+- создание тестовых кандидатов и сделок;
+- заполнение демо-полей;
+- размещение записей на необходимых стадиях воронки;
+- генерацию повторяемых сценариев с кандидатами;
+- подготовку демо-состояний, связанных с SLA;
+- запуск сценария презентации;
+- восстановление / очистку демо-данных.
 
-The main scenario logic lives in `staffflow_simulator.py`.
+Основная логика сценария находится в `staffflow_simulator.py`.
 
 #### `connector/`
 
-The working Bitrix24 connector used by the demo.
+Рабочий Bitrix24-коннектор, используемый демо-стендом.
 
-It provides:
+Он обеспечивает:
 
-- Bitrix24 connector registration;
-- Open Line message delivery;
-- interaction with Bitrix24 REST API;
-- GigaChat-based position recognition;
-- CRM deal creation/update logic;
-- Open Line diagnostics;
-- an external `/send` endpoint for the simulator.
+- регистрацию коннектора Bitrix24;
+- доставку сообщений в Открытую линию;
+- взаимодействие с Bitrix24 REST API;
+- определение должности с помощью GigaChat;
+- создание / обновление сделок CRM;
+- диагностику Открытой линии;
+- внешний endpoint `/send` для симулятора.
 
-The connector is deliberately kept separate from the simulator so the integration layer can be demonstrated independently.
+Коннектор намеренно отделён от симулятора, чтобы интеграционный слой можно было демонстрировать независимо.
 
-## Project structure
+## Структура проекта
 
 ```
 bitrix24-demo-stand/
@@ -117,106 +118,106 @@ bitrix24-demo-stand/
 └── .gitignore
 ```
 
-## Getting started
+## Запуск
 
-### 1. Prepare Bitrix24
+### 1. Подготовить Bitrix24
 
-The demo requires a Bitrix24 portal with:
+Для работы демо требуется портал Bitrix24 с:
 
-- REST access;
-- the recruitment pipeline used by the scenario;
-- the required CRM fields;
-- an Open Line configured for the connector.
+- доступом к REST API;
+- воронкой подбора, используемой в сценарии;
+- необходимыми CRM-полями;
+- настроенной Открытой линией для коннектора.
 
-The setup scripts in `demo-stand/` are intended to prepare the CRM-side demo environment.
+Скрипты настройки в `demo-stand/` предназначены для подготовки демо-окружения со стороны CRM.
 
-### 2. Configure the simulator
+### 2. Настроить симулятор
 
-Copy:
+Скопируйте:
 
 ```text
 demo-stand/.env.example → demo-stand/.env
 ```
 
-Set the Bitrix24 webhook and the connector endpoint/token required by the local environment.
+Укажите webhook Bitrix24 и endpoint / токен коннектора, необходимые для локального окружения.
 
-### 3. Configure the connector
+### 3. Настроить коннектор
 
-Copy:
+Скопируйте:
 
 ```text
 connector/.env.example → connector/.env
 ```
 
-Set the GigaChat authorization key.
+Укажите ключ авторизации GigaChat.
 
-The connector also needs to be deployed to a publicly reachable host because Bitrix24 must be able to call its handler.
+Коннектор также необходимо разместить на публично доступном хосте, поскольку Bitrix24 должен иметь возможность обращаться к его обработчику.
 
-### 4. Install dependencies
+### 4. Установить зависимости
 
-For the simulator:
+Для симулятора:
 
 ```bash
 cd demo-stand
 pip install -r requirements.txt
 ```
 
-For the connector:
+Для коннектора:
 
 ```bash
 cd connector
 pip install -r requirements.txt
 ```
 
-### 5. Run the scenario
+### 5. Запустить сценарий
 
-The exact entry point depends on the scenario being demonstrated. The main simulator and individual demo scripts are kept in `demo-stand/`.
+Точка входа зависит от демонстрируемого сценария. Основной симулятор и отдельные демо-скрипты находятся в `demo-stand/`.
 
-## Presentation scenario
+## Сценарий презентации
 
-The stand was built around a short 5–7 minute demonstration:
+Стенд построен вокруг короткой демонстрации на 5–7 минут:
 
 ```
-Problem
+Проблема
    ↓
-Incoming candidate
+Входящий кандидат
    ↓
-AI qualification
+AI-квалификация
    ↓
 SLA
    ↓
-Recruiter workspace
+Рабочее место рекрутера
    ↓
-Result
+Результат
    ↓
-Report
+Отчёт
    ↓
 V2
 ```
 
-The goal is to show the value of the automation rather than present every possible CRM configuration.
+Цель — показать пользу автоматизации, а не демонстрировать все возможные настройки CRM.
 
-## Safety of demo data
+## Безопасность демо-данных
 
-The simulator works with synthetic candidates and dedicated demo markers.
+Симулятор работает с тестовыми кандидатами и специальными демо-маркерами.
 
-Before using it against a real portal:
+Перед использованием с реальным порталом:
 
-- verify the configured webhook;
-- verify the pipeline and field IDs;
-- check the target Open Line;
-- never commit credentials or tokens;
-- use a dedicated demo environment where possible.
+- проверьте настроенный webhook;
+- проверьте ID воронки и полей;
+- проверьте целевую Открытую линию;
+- никогда не коммитьте credentials или токены;
+- по возможности используйте отдельное демо-окружение.
 
-## Related project
+## Связанный проект
 
-The original setup project remains separate and is not replaced by this repository.
+Исходный проект настройки остаётся отдельным и не заменяется этим репозиторием.
 
-- `bitrix24-quick-setup` — original Bitrix24 setup / automation project.
-- `bitrix24-demo-stand` — standalone portfolio-ready demo environment.
+- `bitrix24-quick-setup` — исходный проект настройки / автоматизации Bitrix24.
+- `bitrix24-demo-stand` — отдельное демонстрационное окружение, подготовленное для портфолио.
 
-## Status
+## Статус
 
-**Working demo project.**
+**Рабочий демонстрационный проект.**
 
-The repository contains the current connector and the demo-stand files used for the Bitrix24 recruitment automation presentation.
+Репозиторий содержит текущий коннектор и файлы демо-стенда, используемые для презентации автоматизации подбора персонала в Bitrix24.
