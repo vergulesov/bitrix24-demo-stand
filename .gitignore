@@ -1,0 +1,10 @@
+.env
+*.log
+__pycache__/
+*.pyc
+*.bak
+*.before-send
+.send_token
+.venv/
+venv/
+.DS_Store
